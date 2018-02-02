@@ -1,6 +1,8 @@
 package com.zoop.http;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +42,7 @@ public class HttpServer {
 		}
 	}
 	
+	//处理请求
 	class SocketHandler implements Runnable{
 
 		private Socket socket;
@@ -52,7 +55,9 @@ public class HttpServer {
 		public void run() {
 			InputStream in = null;
 			try {
-				socket.getInputStream();
+				in = socket.getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				
 			}catch(Exception e) {
 				e.printStackTrace();
 			}finally {
