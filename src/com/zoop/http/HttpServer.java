@@ -12,6 +12,7 @@ import com.zoop.util.Config;
 
 /**
  * 处理网络请求
+ * 
  */
 public class HttpServer {
 
@@ -43,6 +44,17 @@ public class HttpServer {
 	}
 	
 	//处理请求
+	/*
+	password=
+	set
+	time=
+	key=
+	value=string/object
+	
+	password=
+	get
+	key=
+	 */
 	class SocketHandler implements Runnable{
 
 		private Socket socket;
@@ -57,7 +69,25 @@ public class HttpServer {
 			try {
 				in = socket.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				
+				String password = reader.readLine();
+				if(Config.password != null && Config.password.equals(password)) {//密码验证成功
+					String requestType = reader.readLine();
+					if(requestType.equals("GET")) {//取数据
+						String key = reader.readLine();
+						RamData.map.get(key);
+					}
+					if(requestType.equals("set")) {//存数据
+						String time = reader.readLine();//获得保存时间(毫秒)
+						String key = reader.readLine();
+						String line;
+						while((line = reader.readLine()) != null) {
+							
+						}
+						RamData.map.put(key, null);//存数据
+					}
+				}else {//用户密码验证失败
+					//返回密码验证失败
+				}
 			}catch(Exception e) {
 				e.printStackTrace();
 			}finally {
