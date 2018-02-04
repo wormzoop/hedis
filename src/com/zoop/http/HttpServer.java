@@ -3,6 +3,7 @@ package com.zoop.http;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -72,9 +73,14 @@ public class HttpServer {
 				String password = reader.readLine();
 				if(Config.password != null && Config.password.equals(password)) {//密码验证成功
 					String requestType = reader.readLine();
+					System.out.print(requestType);
 					if(requestType.equals("GET")) {//取数据
 						String key = reader.readLine();
-						RamData.map.get(key);
+						System.out.print(key);
+						byte[] buf = RamData.map.get(key);
+						OutputStream out = socket.getOutputStream();
+						out.write(buf);
+						out.close();
 					}
 					if(requestType.equals("set")) {//存数据
 						String time = reader.readLine();//获得保存时间(毫秒)
