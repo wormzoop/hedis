@@ -80,7 +80,7 @@ public class HttpServer {
 						byte[] buf = RamData.map.get(key);
 						OutputStream out = socket.getOutputStream();
 						out.write(buf);
-						out.close();
+						socket.shutdownOutput();
 					}
 					if(requestType.equals("set")) {//存数据
 						String time = reader.readLine();//获得保存时间(毫秒)
