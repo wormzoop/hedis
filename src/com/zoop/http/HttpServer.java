@@ -82,14 +82,11 @@ public class HttpServer {
 						out.write(buf);
 						socket.shutdownOutput();
 					}
-					if(requestType.equals("set")) {//存数据
+					if(requestType.equals("SET")) {//存数据
 						String time = reader.readLine();//获得保存时间(毫秒)
 						String key = reader.readLine();
-						String line;
-						while((line = reader.readLine()) != null) {
-							
-						}
-						RamData.map.put(key, null);//存数据
+						String data = reader.readLine();
+						RamData.map.put(key, data.getBytes());//存数据
 					}
 				}else {//用户密码验证失败
 					//返回密码验证失败
