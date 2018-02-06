@@ -1,11 +1,10 @@
 package com.zoop.http;
 
+import java.io.DataInputStream;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -69,20 +68,26 @@ public class HttpServer {
 			InputStream in = null;
 			try {
 				in = socket.getInputStream();
-				ObjectInputStream ois = new ObjectInputStream(in);
-				@SuppressWarnings("unchecked")
-				Map<String, Object> data = (Map<String, Object>)ois.readObject();
-				String type = data.get("type").toString();
-				String key = data.get("key").toString();
-				if(type.equals("GET")) {//取
-					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-					oos.writeObject(RamData.map.get(key));
-					oos.flush();
-					oos.close();
-				}
-				if(type.equals("SET")) {//存
-					RamData.map.put(key, data);
-				}
+//				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//				String type = reader.readLine();
+//				String key = reader.readLine();
+//				if(type.equals("SET")) {//存
+//					String value = reader.readLine();
+//					System.out.println(value);
+//					byte[] buf = value.getBytes();
+//					System.out.println(Arrays.toString(buf));
+//				}
+//				if(type.equals("GET")) {//取
+//					
+//				}
+				DataInputStream dis = new DataInputStream(in);
+				String type = dis.readUTF();
+				System.out.println(type);
+				String key = dis.readUTF();
+				System.out.println(key);
+				byte[] buf = new byte[1024];
+				dis.read(buf);
+				System.out.println(Arrays.toString(buf));
 			}catch(Exception e) {
 				e.printStackTrace();
 			}finally {
