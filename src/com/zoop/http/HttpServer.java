@@ -1,11 +1,11 @@
 package com.zoop.http;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -69,27 +69,19 @@ public class HttpServer {
 			InputStream in = null;
 			try {
 				in = socket.getInputStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				String password = reader.readLine();
-				if(Config.password != null && Config.password.equals(password)) {//密码验证成功
-					String requestType = reader.readLine();
-					System.out.print(requestType);
-					if(requestType.equals("GET")) {//取数据
-						String key = reader.readLine();
-						System.out.print(key);
-						byte[] buf = RamData.map.get(key);
-						OutputStream out = socket.getOutputStream();
-						out.write(buf);
-						socket.shutdownOutput();
-					}
-					if(requestType.equals("SET")) {//存数据
-						String time = reader.readLine();//获得保存时间(毫秒)
-						String key = reader.readLine();
-						String data = reader.readLine();
-						RamData.map.put(key, data.getBytes());//存数据
-					}
-				}else {//用户密码验证失败
-					//返回密码验证失败
+				ObjectInputStream ois = new ObjectInputStream(in);
+				@SuppressWarnings("unchecked")
+				Map<String, Object> data = (Map<String, Object>)ois.readObject();
+				String type = data.get("type").toString();
+				String key = data.get("key").toString();
+				if(type.equals("GET")) {//取
+					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+					oos.writeObject(RamData.map.get(key));
+					oos.flush();
+					oos.close();
+				}
+				if(type.equals("SET")) {//存
+					RamData.map.put(key, data);
 				}
 			}catch(Exception e) {
 				e.printStackTrace();
