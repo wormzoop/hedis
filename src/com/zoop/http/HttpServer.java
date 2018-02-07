@@ -2,6 +2,7 @@ package com.zoop.http;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
@@ -45,15 +46,11 @@ public class HttpServer {
 	
 	//处理请求
 	/*
-	password=
-	set
-	time=
-	key=
-	value=string/object
-	
-	password=
-	get
-	key=
+	password          password
+	set               get
+	key               key
+	time
+	value
 	 */
 	class SocketHandler implements Runnable{
 
@@ -68,26 +65,36 @@ public class HttpServer {
 			InputStream in = null;
 			try {
 				in = socket.getInputStream();
-//				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-//				String type = reader.readLine();
-//				String key = reader.readLine();
-//				if(type.equals("SET")) {//存
-//					String value = reader.readLine();
-//					System.out.println(value);
-//					byte[] buf = value.getBytes();
-//					System.out.println(Arrays.toString(buf));
-//				}
-//				if(type.equals("GET")) {//取
-//					
-//				}
 				DataInputStream dis = new DataInputStream(in);
 				String type = dis.readUTF();
 				System.out.println(type);
 				String key = dis.readUTF();
 				System.out.println(key);
-				byte[] buf = new byte[1024];
-				dis.read(buf);
-				System.out.println(Arrays.toString(buf));
+				if(type.equals("SET")) {
+					byte[] buf = new byte[1024];
+					byte[] resbuf = null;
+					int len;
+					while((len = dis.read(buf)) != -1) {
+						if(resbuf != null) {
+							byte[] temp = resbuf;
+							resbuf = new byte[temp.length+len];
+							System.arraycopy(temp, 0, resbuf, 0, temp.length);
+							System.arraycopy(buf, 0, resbuf, temp.length, len);
+							
+						}else {
+							resbuf = new byte[len];
+							System.arraycopy(buf, 0, resbuf, 0, len);
+						}
+					}
+					System.out.println(Arrays.toString(resbuf));
+					RamData.map.put(key, resbuf);
+				}
+				if(type.equals("GET")) {
+					OutputStream os = socket.getOutputStream();
+					os.write(RamData.map.get(key));
+					os.flush();
+					os.close();
+				}
 			}catch(Exception e) {
 				e.printStackTrace();
 			}finally {
