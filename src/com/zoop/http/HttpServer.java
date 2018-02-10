@@ -70,7 +70,7 @@ public class HttpServer {
 				System.out.println(type);
 				String key = dis.readUTF();
 				System.out.println(key);
-				if(type.equals("SET")) {
+				if(type.equals("SET")) {//存
 					byte[] buf = new byte[1024];
 					byte[] resbuf = null;
 					int len;
@@ -89,7 +89,7 @@ public class HttpServer {
 					System.out.println(Arrays.toString(resbuf));
 					RamData.map.put(key, resbuf);
 				}
-				if(type.equals("GET")) {
+				if(type.equals("GET")) {//取
 					OutputStream os = socket.getOutputStream();
 					os.write(RamData.map.get(key));
 					os.flush();
