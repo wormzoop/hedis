@@ -34,6 +34,7 @@ public class PersistenceHandler {
 							Persistence persis = new Persistence(key, RamData.temp.get(key));
 							byte[] buf = SerializableUtil.objToByte(persis);
 							out.write(buf);
+							out.write("\r\n".getBytes());//写入换行符window,linux不同
 							out.flush();
 						}
 						out.close();
