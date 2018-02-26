@@ -1,5 +1,8 @@
 package com.zoop.persistence;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.zoop.http.RamData;
 
 /**
@@ -10,10 +13,19 @@ import com.zoop.http.RamData;
  */
 public class PersistenceHandler {
 
+	private static int time = 1000*60*1;//默认一小时
+	
 	public static void persistence() {
-		if(RamData.map.size() > 0) {
-			
-		}
+		//定时任务
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if(RamData.temp.size() > 0) {
+					
+				}
+			}
+		},time);
 	}
 	
 }
