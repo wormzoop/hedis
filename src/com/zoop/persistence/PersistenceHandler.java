@@ -1,9 +1,9 @@
 package com.zoop.persistence;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,9 +12,9 @@ import com.zoop.util.SerializableUtil;
 
 /**
  * 持久化处理
- * 配置文件配置是否需要持久化
- * 配置持久化的时间
- * 重新启动的时候将持久化文件中的数据读取到内存
+ * 1.定时存储到文件中:
+ *   先存到临时文件在替换源文件
+ * 2.启动时把文件实例化到内存中
  */
 public class PersistenceHandler {
 
@@ -23,24 +23,24 @@ public class PersistenceHandler {
 	public void persistence() {
 		String domain = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
 		File temp = new File(domain);
-		String persisPath = temp.getParentFile().getParentFile().getAbsolutePath()+File.separator+"persistence"+File.separator+"persistence.txt";
+		String newPath = temp.getParentFile().getParentFile().getAbsolutePath()+File.separator+"persistence"+File.separator+"temp.txt";
 		//定时任务
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				if(RamData.temp.size() > 0) {
+				if(RamData.map.size() > 0) {
 					FileOutputStream out = null;
 					try {
-						out = new FileOutputStream(new File(persisPath));
-						for(String key : RamData.temp.keySet()) {
-							Persistence persis = new Persistence(key, RamData.temp.get(key));
-							byte[] buf = SerializableUtil.objToByte(persis);
-							out.write(buf);
-							out.write("\r\n".getBytes());//写入换行符window,linux不同
-							out.flush();
-						}
-						RamData.temp.clear();//清空临时数据
+						out = new FileOutputStream(new File(newPath));
+						byte[] buf = SerializableUtil.objToByte(RamData.map);
+						out.write(buf);
+						out.close();
+						String old = temp.getParentFile().getParentFile().getAbsolutePath()+File.separator+"persistence"+File.separator+"persistence.txt";
+						File oldFile = new File(old);
+						oldFile.deleteOnExit();
+						File newFile = new File(newPath);
+						newFile.renameTo(new File(old));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}finally {
@@ -58,6 +58,7 @@ public class PersistenceHandler {
 	}
 	
 	//将持久化文件中的数据读入到缓存中，在每次启动的时候执行
+	@SuppressWarnings("unchecked")
 	public void inRam() {
 		String domain = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
 		File temp = new File(domain);
@@ -65,8 +66,8 @@ public class PersistenceHandler {
 		FileInputStream in = null; 
 		try {
 			in = new FileInputStream(persisPath);
-			DataInputStream iin = new DataInputStream(in);
-			iin.readByte();
+			Map<String, byte[]> map = (Map<String, byte[]>)SerializableUtil.byteToObj(in.readAllBytes());
+			RamData.map.putAll(map);//将map复制到内存中
 		}catch(Exception e) {
 			e.printStackTrace();
 		}finally {
