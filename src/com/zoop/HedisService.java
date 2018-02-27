@@ -5,6 +5,9 @@ import com.zoop.util.Config;
 
 /**
  * 启动服务
+ * 准备工作:
+ *  1.读取配置文件
+ *  2.从持久化文件读取数据到缓存中
  */
 public class HedisService {
 
