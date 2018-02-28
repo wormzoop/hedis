@@ -66,7 +66,9 @@ public class PersistenceHandler {
 		FileInputStream in = null; 
 		try {
 			in = new FileInputStream(persisPath);
-			Map<String, byte[]> map = (Map<String, byte[]>)SerializableUtil.byteToObj(in.readAllBytes());
+			byte[] buf = new byte[in.available()];
+			in.read(buf);
+			Map<String, byte[]> map = (Map<String, byte[]>)SerializableUtil.byteToObj(buf);
 			RamData.map.putAll(map);//将map复制到内存中
 		}catch(Exception e) {
 			e.printStackTrace();
